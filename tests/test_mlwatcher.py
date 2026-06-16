@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from mlwatcher import (
     CUSUM,
@@ -52,7 +51,9 @@ def test_cusum_detects_level_shift():
 
 def test_cusum_quiet_on_stationary():
     det = CUSUM(window=50)
-    changes = [i for i, v in enumerate(_clean(n=500)) if det.update(float(v)).is_anomaly]
+    changes = [
+        i for i, v in enumerate(_clean(n=500)) if det.update(float(v)).is_anomaly
+    ]
     # Stationary noise: default h gives a high ARL, so at most a rare blip.
     assert len(changes) <= 1
 
@@ -99,7 +100,7 @@ def test_watcher_cooldown_throttles(tmp_path):
     w.run(base, timestamps=[float(i) for i in range(len(base))])
     # Throttled: no two alerts from the same detector within the cooldown.
     times = sorted(a.timestamp for a in alerts)
-    assert all(b - a >= 5.0 for a, b in zip(times, times[1:]))
+    assert all(b - a >= 5.0 for a, b in zip(times, times[1:], strict=False))
     # And the burst is collapsed to far fewer than 10 alerts.
     assert len(alerts) < 5
 

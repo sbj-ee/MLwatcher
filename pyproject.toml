@@ -20,6 +20,8 @@ demo = [
 dev = [
     "pytest>=9.1.0",
     "numpy>=2.4.6",
+    "ruff>=0.9.0",
+    "mypy>=1.15.0",
 ]
 
 [build-system]
@@ -31,3 +33,20 @@ packages = ["src/mlwatcher"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+# pycodestyle, Pyflakes, isort, pyupgrade, flake8-bugbear, comprehensions.
+select = ["E", "F", "I", "UP", "B", "C4"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/mlwatcher"]
+strict = true
+# Optional extras aren't installed in the type-check environment.
+[[tool.mypy.overrides]]
+module = ["matplotlib.*", "numpy.*"]
+ignore_missing_imports = true

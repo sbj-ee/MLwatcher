@@ -7,10 +7,9 @@ O(window) or O(1), never a full re-fit over history.
 
 from __future__ import annotations
 
-import math
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol
 
 
 @dataclass
@@ -24,7 +23,7 @@ class Detection:
     is_anomaly: bool
     kind: str  # "point" | "change"
     warmup: bool = False
-    info: dict = field(default_factory=dict)
+    info: dict[str, Any] = field(default_factory=dict)
 
 
 class Detector(Protocol):
@@ -178,7 +177,7 @@ class CUSUM:
         )
 
 
-def _robust_baseline(buf) -> tuple[float, float]:
+def _robust_baseline(buf: deque[float]) -> tuple[float, float]:
     """Robust center and scale of ``buf`` via median and MAD.
 
     Returns ``(median, scale)`` where ``scale`` is the MAD rescaled to a

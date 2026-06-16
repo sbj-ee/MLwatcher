@@ -12,14 +12,14 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .alerts import ConsoleSink, WebhookSink
+from .alerts import AlertSink, ConsoleSink, WebhookSink
 from .history import HistoryStore
 from .sources import csv_stream
-from .transforms import EWMADetrender, SeasonalDetrender
+from .transforms import EWMADetrender, SeasonalDetrender, Transform
 from .watcher import Watcher, default_detectors
 
 
-def _coerce_column(spec: str | None):
+def _coerce_column(spec: str | None) -> str | int | None:
     if spec is None:
         return None
     return int(spec) if spec.lstrip("-").isdigit() else spec
@@ -97,7 +97,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
-    sinks = []
+    sinks: list[AlertSink] = []
     if not args.quiet:
         sinks.append(ConsoleSink())
     if args.webhook:
@@ -106,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
             on_error=lambda e: print(f"webhook error: {e}", file=sys.stderr),
         ))
 
-    detrender = None
+    detrender: Transform | None = None
     if args.period is not None:
         detrender = SeasonalDetrender(
             period=args.period,
@@ -132,9 +132,12 @@ def main(argv: list[str] | None = None) -> int:
         freeze_on_alert=args.freeze_on_alert,
     )
 
+    # --value-column has a default, so this is never None (unlike --time-column).
+    value_column = _coerce_column(args.value_column)
+    assert value_column is not None
     stream = csv_stream(
         args.csv,
-        value_column=_coerce_column(args.value_column),
+        value_column=value_column,
         time_column=_coerce_column(args.time_column),
         has_header=not args.no_header,
         delimiter=args.delimiter,

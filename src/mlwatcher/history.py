@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from .detectors import Detection
 
@@ -38,7 +39,7 @@ class HistoryStore:
         residual: float | None = None,
         frozen: bool = False,
     ) -> None:
-        row = {
+        row: dict[str, Any] = {
             "timestamp": timestamp,
             "value": value,
             "scores": {
@@ -66,16 +67,16 @@ class HistoryStore:
         if not self._fh.closed:
             self._fh.close()
 
-    def __enter__(self) -> "HistoryStore":
+    def __enter__(self) -> HistoryStore:
         return self
 
-    def __exit__(self, *exc) -> None:
+    def __exit__(self, *exc: object) -> None:
         self.close()
 
 
-def load_history(path: str | Path) -> list[dict]:
+def load_history(path: str | Path) -> list[dict[str, Any]]:
     """Read a JSONL history file back into a list of rows."""
-    rows: list[dict] = []
+    rows: list[dict[str, Any]] = []
     with Path(path).open("r", encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()

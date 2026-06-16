@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import csv
 import time
+from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Iterator
 
 
 def csv_stream(
@@ -49,6 +49,7 @@ def csv_stream(
     """
     path = Path(path)
     with path.open("r", newline="", encoding="utf-8") as fh:
+        rows: Iterator[tuple[str | None, str | None]]
         if has_header:
             reader = csv.DictReader(fh, delimiter=delimiter)
             vcol = _resolve_named(reader.fieldnames, value_column, "value_column")
@@ -73,7 +74,7 @@ def csv_stream(
             if raw_value is None or raw_value == "":
                 continue  # skip blank metric cells
             value = float(raw_value)
-            ts = float(raw_ts) if raw_ts not in (None, "") else None
+            ts = float(raw_ts) if raw_ts else None
 
             if (
                 replay_speed
@@ -88,7 +89,9 @@ def csv_stream(
             yield ts, value
 
 
-def _resolve_named(fieldnames, column, label: str) -> str:
+def _resolve_named(
+    fieldnames: Sequence[str] | None, column: str | int, label: str
+) -> str:
     """Map a name-or-index column spec to an actual header name."""
     if fieldnames is None:
         raise ValueError(f"{label}: CSV has no header row")

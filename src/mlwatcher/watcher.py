@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Iterable, Sequence
 
 from .alerts import Alert, AlertSink, ConsoleSink
-from .detectors import Detector, Detection, CUSUM, RobustZScore
+from .detectors import CUSUM, Detection, Detector, RobustZScore
 from .history import HistoryStore
 from .transforms import Transform
 
@@ -201,10 +201,10 @@ class Watcher:
         self._last_alert[detector] = ts
         return True
 
-    def __enter__(self) -> "Watcher":
+    def __enter__(self) -> Watcher:
         return self
 
-    def __exit__(self, *exc) -> None:
+    def __exit__(self, *exc: object) -> None:
         self.close()
 
 

@@ -8,15 +8,16 @@ matplotlib is an optional dependency. Install with::
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from .history import load_history
 
 
 def plot_history(
-    source,
+    source: str | Path | list[dict[str, Any]],
     save_path: str | Path | None = None,
     show: bool = False,
-):
+) -> Any:
     """Plot the signal + per-detector scores from a history file or rows.
 
     Parameters
@@ -64,7 +65,7 @@ def plot_history(
         pred = [r.get("prediction") for r in rows]
         ax.plot(t, pred, lw=1.2, color="#ff9900", ls="--",
                 label="learned baseline")
-    anom_t = [ti for ti, r in zip(t, rows) if r["anomaly"]]
+    anom_t = [ti for ti, r in zip(t, rows, strict=True) if r["anomaly"]]
     anom_v = [r["value"] for r in rows if r["anomaly"]]
     if anom_t:
         ax.scatter(anom_t, anom_v, color="#cc2222", s=28, zorder=5,
@@ -92,7 +93,7 @@ def plot_history(
         ax.grid(alpha=0.25)
 
     # One panel per detector: score vs threshold.
-    for ax, name in zip(axes[panel:], detector_names):
+    for ax, name in zip(axes[panel:], detector_names, strict=True):
         scores = [r["scores"].get(name, {}).get("score", 0.0) for r in rows]
         thresh = next(
             (r["scores"][name]["threshold"] for r in rows if name in r["scores"]),
@@ -103,7 +104,7 @@ def plot_history(
             ax.axhline(thresh, color="#cc2222", ls="--", lw=1.0,
                        label=f"threshold={thresh:g}")
         flagged_t = [
-            ti for ti, r in zip(t, rows)
+            ti for ti, r in zip(t, rows, strict=True)
             if r["scores"].get(name, {}).get("is_anomaly")
         ]
         for ft in flagged_t:
@@ -122,7 +123,14 @@ def plot_history(
     return fig
 
 
-def _shade_spans(ax, t, mask, color, alpha, label=None):
+def _shade_spans(
+    ax: Any,
+    t: list[float],
+    mask: list[bool],
+    color: str,
+    alpha: float,
+    label: str | None = None,
+) -> None:
     """Shade contiguous runs where ``mask`` is True; label only the first."""
     start = None
     for i, on in enumerate(mask):

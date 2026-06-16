@@ -20,5 +20,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Sync dependencies
         run: uv sync --extra dashboard --extra demo
+      - name: Lint (ruff)
+        run: uv run ruff check src tests examples
+      - name: Type-check (mypy)
+        run: uv run mypy
       - name: Run tests
         run: uv run python -m pytest -q

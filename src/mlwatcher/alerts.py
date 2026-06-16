@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import sys
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Callable, Protocol
+from datetime import UTC, datetime
+from typing import Any, Protocol, TextIO
 
 
 @dataclass
@@ -22,11 +23,11 @@ class Alert:
     threshold: float
     message: str
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp,
             "iso_time": datetime.fromtimestamp(
-                self.timestamp, tz=timezone.utc
+                self.timestamp, tz=UTC
             ).isoformat(),
             "detector": self.detector,
             "kind": self.kind,
@@ -44,7 +45,7 @@ class AlertSink(Protocol):
 class ConsoleSink:
     """Print alerts to a stream (stderr by default)."""
 
-    def __init__(self, stream=sys.stderr) -> None:
+    def __init__(self, stream: TextIO = sys.stderr) -> None:
         self._stream = stream
 
     def __call__(self, alert: Alert) -> None:
