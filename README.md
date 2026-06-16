@@ -102,6 +102,18 @@ uv run --extra tclab --extra dashboard python examples/tclab_live.py
 uv run --extra tclab python examples/tclab_live.py --model   # no device needed
 ```
 
+The CLI speaks TCLab directly too — pass `--tclab` instead of a CSV path:
+
+```bash
+# watch T1 live until Ctrl-C, logging history and rendering a dashboard
+uv run --extra tclab --extra dashboard python -m mlwatcher --tclab \
+    --history out.jsonl --plot dash.png
+
+# 3-minute run that steps heater Q1 to 60% at sample 30 (gives CUSUM a change)
+uv run --extra tclab python -m mlwatcher --tclab \
+    --tclab-heater 60 --tclab-heater-at 30 --tclab-samples 180 --history out.jsonl
+```
+
 Install the extra with `uv sync --extra tclab`.
 
 ## Seasonal / trending data (detrending)
