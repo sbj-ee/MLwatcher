@@ -29,9 +29,16 @@ class Observation:
         return any(d.is_anomaly for d in self.detections)
 
 
-def default_detectors(window: int = 50) -> list[Detector]:
-    """A sensible point + change detector pair."""
-    return [RobustZScore(window=window), CUSUM(window=window)]
+def default_detectors(window: int = 50, min_scale: float = 0.0) -> list[Detector]:
+    """A sensible point + change detector pair.
+
+    ``min_scale`` floors the robust scale (see :class:`RobustZScore`); set it to
+    the sensor resolution for quantized real-world signals.
+    """
+    return [
+        RobustZScore(window=window, min_scale=min_scale),
+        CUSUM(window=window, min_scale=min_scale),
+    ]
 
 
 class Watcher:

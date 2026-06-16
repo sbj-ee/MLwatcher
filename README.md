@@ -190,6 +190,12 @@ All thresholds are explicit knobs — "beyond a threshold" is yours to set:
   point detector fires repeatedly until its rolling median catches up; a
   cooldown collapses that into a single alert.
 - **`window`** — larger = steadier baseline, slower to adapt to genuine drift.
+- **`min_scale`** (both detectors / CLI `--min-scale`) — a floor on the robust
+  scale, in the signal's units. On a **quantized** sensor that sits flat, the
+  rolling MAD collapses to 0 and a single quantization step would otherwise
+  divide by ~0 and score in the millions. Set `min_scale` to roughly the sensor
+  resolution (e.g. `0.1` for TCLab's ~0.06 °C) so a flat signal stays quiet
+  while genuine jumps are still caught. Default `0.0` keeps the old behavior.
 
 The detectors assume a roughly **stationary** baseline. On strongly trending or
 seasonal data, add a detrender (see [Seasonal / trending

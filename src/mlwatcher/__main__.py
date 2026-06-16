@@ -58,6 +58,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="rolling window size for the detectors (default: 50)",
     )
     p.add_argument(
+        "--min-scale", type=float, default=0.0,
+        help="floor on the robust scale, in the signal's units; set to the "
+             "sensor resolution so a flat quantized signal can't score huge "
+             "(default: 0)",
+    )
+    p.add_argument(
         "--replay-speed", type=float, default=None,
         help="pace rows by their timestamps at this speed multiplier "
              "(needs --time-column; e.g. 10 = 10x real time)",
@@ -167,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     watcher = Watcher(
-        detectors=default_detectors(window=args.window),
+        detectors=default_detectors(window=args.window, min_scale=args.min_scale),
         sinks=sinks,
         history=history,
         cooldown=args.cooldown,

@@ -57,6 +57,12 @@ class RobustZScore:
         Robust z-score above which a value is flagged.
     min_samples:
         Values seen before the detector starts scoring (warmup).
+    min_scale:
+        Floor on the robust scale (MAD-derived std) in the signal's units.
+        Set this to the sensor's resolution/noise floor so that a near-constant
+        but *quantized* signal can't produce huge scores: when the window is
+        flat the MAD is ~0, and without a floor a single quantization step
+        divides by ~0. ``0.0`` (default) keeps the old tiny-epsilon fallback.
     """
 
     def __init__(
@@ -64,13 +70,17 @@ class RobustZScore:
         window: int = 50,
         threshold: float = 4.0,
         min_samples: int | None = None,
+        min_scale: float = 0.0,
     ) -> None:
         if window < 2:
             raise ValueError("window must be >= 2")
+        if min_scale < 0.0:
+            raise ValueError("min_scale must be >= 0")
         self.name = "robust_zscore"
         self.window = window
         self.threshold = threshold
         self.min_samples = min_samples or max(10, window // 2)
+        self.min_scale = min_scale
         self._buf: deque[float] = deque(maxlen=window)
 
     def reset(self) -> None:
@@ -87,7 +97,7 @@ class RobustZScore:
                 is_anomaly=False, kind="point", warmup=True,
             )
 
-        median, scale = _robust_baseline(buf)
+        median, scale = _robust_baseline(buf, self.min_scale)
         score = abs(value - median) / scale
         is_anom = bool(score > self.threshold)
         # Append after scoring so the current point never biases its own
@@ -119,6 +129,11 @@ class CUSUM:
         Decision interval (in std units). Larger = fewer false alarms, slower.
     min_samples:
         Values seen before scoring begins (warmup).
+    min_scale:
+        Floor on the robust scale in the signal's units (see
+        :class:`RobustZScore`). Prevents a flat, quantized window from making
+        the standardized residual explode. ``0.0`` (default) keeps the old
+        tiny-epsilon fallback.
     """
 
     def __init__(
@@ -127,14 +142,18 @@ class CUSUM:
         k: float = 0.5,
         h: float = 7.0,
         min_samples: int | None = None,
+        min_scale: float = 0.0,
     ) -> None:
         if window < 2:
             raise ValueError("window must be >= 2")
+        if min_scale < 0.0:
+            raise ValueError("min_scale must be >= 0")
         self.name = "cusum"
         self.window = window
         self.k = k
         self.h = h
         self.min_samples = min_samples or max(10, window // 2)
+        self.min_scale = min_scale
         self._buf: deque[float] = deque(maxlen=window)
         self._s_hi = 0.0
         self._s_lo = 0.0
@@ -154,7 +173,7 @@ class CUSUM:
                 is_anomaly=False, kind="change", warmup=True,
             )
 
-        median, scale = _robust_baseline(buf)
+        median, scale = _robust_baseline(buf, self.min_scale)
         z = (value - median) / scale
         self._s_hi = max(0.0, self._s_hi + z - self.k)
         self._s_lo = max(0.0, self._s_lo - z - self.k)
@@ -177,17 +196,21 @@ class CUSUM:
         )
 
 
-def _robust_baseline(buf: deque[float]) -> tuple[float, float]:
+def _robust_baseline(
+    buf: deque[float], min_scale: float = 0.0
+) -> tuple[float, float]:
     """Robust center and scale of ``buf`` via median and MAD.
 
     Returns ``(median, scale)`` where ``scale`` is the MAD rescaled to a
-    consistent std estimate. A degenerate (constant) window yields a near-zero
-    MAD; we floor the scale at a tiny epsilon so a genuine jump still scores
-    high instead of dividing by zero.
+    consistent std estimate, floored at ``min_scale``. A degenerate (constant)
+    window yields a near-zero MAD; ``min_scale`` (e.g. the sensor resolution)
+    keeps a flat, quantized signal from making the score explode. With the
+    default ``min_scale=0`` we still floor at a tiny epsilon so a genuine jump
+    scores high instead of dividing by zero.
     """
     median = _median_sorted(sorted(buf))
     mad = _median_sorted(sorted(abs(x - median) for x in buf))
-    scale = _MAD_TO_STD * mad
+    scale = max(_MAD_TO_STD * mad, min_scale)
     if scale <= 1e-12:
         scale = 1e-9
     return median, scale

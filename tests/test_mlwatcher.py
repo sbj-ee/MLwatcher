@@ -68,6 +68,22 @@ def test_constant_window_no_div_by_zero():
     assert jump.is_anomaly  # genuine jump still caught
 
 
+def test_min_scale_suppresses_quantized_ticks():
+    # A flat, quantized signal: without min_scale a single 0.06 step on a
+    # zero-MAD window scores astronomically; min_scale floors the denominator.
+    naive = RobustZScore(window=20)
+    floored = RobustZScore(window=20, min_scale=0.1)
+    for _ in range(30):
+        naive.update(23.8)
+        floored.update(23.8)
+    tick_naive = naive.update(23.86)   # one sensor quantum
+    tick_floored = floored.update(23.86)
+    assert tick_naive.is_anomaly        # the bug: explodes on a tiny tick
+    assert not tick_floored.is_anomaly  # fixed: 0.06 / 0.1 < threshold
+    # A genuine jump is still caught with the floor in place.
+    assert floored.update(50.0).is_anomaly
+
+
 def test_watcher_history_and_alerts(tmp_path):
     alerts = []
     hist_path = tmp_path / "h.jsonl"
