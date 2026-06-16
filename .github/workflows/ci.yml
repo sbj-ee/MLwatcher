@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Sync dependencies
-        run: uv sync --extra dashboard --extra demo
+        run: uv sync --extra dashboard --extra demo --extra tclab
       - name: Lint (ruff)
         run: uv run ruff check src tests examples
       - name: Type-check (mypy)

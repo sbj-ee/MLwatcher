@@ -9,7 +9,7 @@ from .alerts import (
 )
 from .detectors import CUSUM, Detection, Detector, RobustZScore
 from .history import HistoryStore, load_history
-from .sources import csv_stream
+from .sources import csv_stream, tclab_stream
 from .transforms import EWMADetrender, SeasonalDetrender, Transform, Trend
 from .watcher import Observation, Watcher, default_detectors
 
@@ -31,6 +31,7 @@ __all__ = [
     "HistoryStore",
     "load_history",
     "csv_stream",
+    "tclab_stream",
     "EWMADetrender",
     "SeasonalDetrender",
     "Transform",

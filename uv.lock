@@ -388,6 +388,9 @@ dashboard = [
 demo = [
     { name = "numpy" },
 ]
+tclab = [
+    { name = "tclab" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -401,8 +404,9 @@ dev = [
 requires-dist = [
     { name = "matplotlib", marker = "extra == 'dashboard'", specifier = ">=3.11.0" },
     { name = "numpy", marker = "extra == 'demo'", specifier = ">=2.4.6" },
+    { name = "tclab", marker = "extra == 'tclab'", specifier = ">=1.0.0" },
 ]
-provides-extras = ["dashboard", "demo"]
+provides-extras = ["dashboard", "demo", "tclab"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -641,6 +645,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyserial"
+version = "3.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb", size = 159125 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/bc/587a445451b253b285629263eb51c2d8e9bcea4fc97826266d186f96f558/pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0", size = 90585 },
+]
+
+[[package]]
 name = "pytest"
 version = "9.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -700,6 +713,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050 },
+]
+
+[[package]]
+name = "tclab"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyserial" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/84/82/2790f9830074b673c656a50c65f5ce93b5e39f1364ffdba53ae67fa3450e/tclab-1.0.0.tar.gz", hash = "sha256:714cc0f7a18e6915922242daa76626148613107ef3c344c301b67e8a69cee63b", size = 23048 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/15/c3/c9eda299ce9ae2edff6bda60ce6e81a0d69aea9471611f88941741ad740e/tclab-1.0.0-py2.py3-none-any.whl", hash = "sha256:40fa767e1ebfe49d8124f83774d0af1b3928cd3c753d8d9ae04e19118e202b82", size = 20792 },
 ]
 
 [[package]]

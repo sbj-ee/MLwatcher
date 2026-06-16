@@ -78,6 +78,32 @@ There's also a self-contained synthetic demo:
 uv run --extra dashboard python examples/demo_stream.py
 ```
 
+## Live input: TCLab Arduino
+
+`tclab_stream()` is a *real* live source — it reads a temperature channel off a
+connected [TCLab](https://apmonitor.com/heat.htm) Arduino once per period and
+yields `(timestamp, value)`, exactly what the watcher consumes:
+
+```python
+from mlwatcher import Watcher, ConsoleSink, tclab_stream
+
+watcher = Watcher(sinks=[ConsoleSink()])
+for ts, temp in tclab_stream("T1", period=1.0):   # one reading/sec, in °C
+    watcher.observe(temp, timestamp=ts)
+```
+
+Pass `on_tick=callback(lab, i)` to drive the heaters mid-stream (so there's a
+real change to detect), or `use_model=True` to run against TCLab's digital twin
+with no hardware attached. The bundled example steps heater Q1 partway through,
+producing a sustained ramp that CUSUM flags:
+
+```bash
+uv run --extra tclab --extra dashboard python examples/tclab_live.py
+uv run --extra tclab python examples/tclab_live.py --model   # no device needed
+```
+
+Install the extra with `uv sync --extra tclab`.
+
 ## Seasonal / trending data (detrending)
 
 The detectors assume a roughly **stationary** baseline. A slow daily cycle or
@@ -175,7 +201,7 @@ src/mlwatcher/
   watcher.py     Watcher — detrend, fan-out to detectors, history, alerts
   alerts.py      Console / Webhook / Callback sinks
   history.py     JSONL score log (append or fresh) + loader
-  sources.py     csv_stream() — simulate a live feed from CSV
+  sources.py     csv_stream() — replay a CSV; tclab_stream() — live TCLab feed
   dashboard.py   matplotlib visualization (optional extra)
   __main__.py    CLI: python -m mlwatcher
 examples/        demo_stream.py, sample.csv, seasonal.csv
