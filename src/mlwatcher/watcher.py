@@ -81,7 +81,7 @@ class Watcher:
         self.sinks: list[AlertSink] = list(
             sinks if sinks is not None else [ConsoleSink()]
         )
-        if isinstance(history, (str,)) or hasattr(history, "__fspath__"):
+        if isinstance(history, str) or hasattr(history, "__fspath__"):
             history = HistoryStore(history)  # type: ignore[arg-type]
         self.history: HistoryStore | None = history
         self.cooldown = cooldown
@@ -211,9 +211,9 @@ class Watcher:
 def _describe(det: Detection, detrended: bool = False) -> str:
     if det.kind == "change":
         direction = det.info.get("direction", 0)
-        word = "upward" if direction > 0 else "downward" if direction < 0 else ""
+        word = "upward " if direction > 0 else "downward " if direction < 0 else ""
         suffix = " in residual" if detrended else ""
-        return f"sustained {word} level change detected{suffix}".replace("  ", " ")
+        return f"sustained {word}level change detected{suffix}"
     if detrended:
         return f"point anomaly: residual {det.score:.1f}x beyond expected baseline"
     median = det.info.get("median")

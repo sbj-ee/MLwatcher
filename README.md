@@ -185,7 +185,7 @@ tests/           pytest suite
 ## Test
 
 ```bash
-uv run pytest
+uv run python -m pytest
 ```
 
 ## License
