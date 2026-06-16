@@ -23,8 +23,9 @@ from-scratch explainer tied to this code.
 ## Install
 
 ```bash
-uv sync                       # core (numpy)
+uv sync                       # core (pure stdlib, no runtime deps)
 uv sync --extra dashboard     # + matplotlib for plots
+uv sync --extra demo          # + numpy for examples/demo_stream.py
 ```
 
 ## Quick start (library)

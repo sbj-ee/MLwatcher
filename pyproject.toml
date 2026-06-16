@@ -6,18 +6,20 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = [
-    "numpy>=2.4.6",
-]
+dependencies = []
 
 [project.optional-dependencies]
 dashboard = [
     "matplotlib>=3.11.0",
 ]
+demo = [
+    "numpy>=2.4.6",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.0",
+    "numpy>=2.4.6",
 ]
 
 [build-system]

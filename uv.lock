@@ -276,29 +276,33 @@ wheels = [
 name = "mlwatcher"
 version = "0.1.0"
 source = { editable = "." }
-dependencies = [
-    { name = "numpy" },
-]
 
 [package.optional-dependencies]
 dashboard = [
     { name = "matplotlib" },
 ]
+demo = [
+    { name = "numpy" },
+]
 
 [package.dev-dependencies]
 dev = [
+    { name = "numpy" },
     { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "matplotlib", marker = "extra == 'dashboard'", specifier = ">=3.11.0" },
-    { name = "numpy", specifier = ">=2.4.6" },
+    { name = "numpy", marker = "extra == 'demo'", specifier = ">=2.4.6" },
 ]
-provides-extras = ["dashboard"]
+provides-extras = ["dashboard", "demo"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9.1.0" }]
+dev = [
+    { name = "numpy", specifier = ">=2.4.6" },
+    { name = "pytest", specifier = ">=9.1.0" },
+]
 
 [[package]]
 name = "numpy"

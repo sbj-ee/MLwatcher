@@ -88,15 +88,7 @@ class RobustZScore:
                 is_anomaly=False, kind="point", warmup=True,
             )
 
-        ordered = sorted(buf)
-        median = _median_sorted(ordered)
-        mad = _median_sorted(sorted(abs(x - median) for x in buf))
-        scale = _MAD_TO_STD * mad
-        if scale <= 1e-12:
-            # Degenerate (constant) window: fall back to a tiny epsilon so a
-            # genuine jump still scores high instead of dividing by zero.
-            scale = 1e-9
-
+        median, scale = _robust_baseline(buf)
         score = abs(value - median) / scale
         is_anom = bool(score > self.threshold)
         # Append after scoring so the current point never biases its own
@@ -105,7 +97,7 @@ class RobustZScore:
         return Detection(
             self.name, value, float(score), self.threshold,
             is_anomaly=is_anom, kind="point",
-            info={"median": float(median), "mad": float(mad)},
+            info={"median": float(median), "scale": float(scale)},
         )
 
 
@@ -163,13 +155,7 @@ class CUSUM:
                 is_anomaly=False, kind="change", warmup=True,
             )
 
-        ordered = sorted(buf)
-        median = _median_sorted(ordered)
-        mad = _median_sorted(sorted(abs(x - median) for x in buf))
-        scale = _MAD_TO_STD * mad
-        if scale <= 1e-12:
-            scale = 1e-9
-
+        median, scale = _robust_baseline(buf)
         z = (value - median) / scale
         self._s_hi = max(0.0, self._s_hi + z - self.k)
         self._s_lo = max(0.0, self._s_lo - z - self.k)
@@ -190,6 +176,22 @@ class CUSUM:
             is_anomaly=is_change, kind="change",
             info={"direction": direction, "z": float(z)},
         )
+
+
+def _robust_baseline(buf) -> tuple[float, float]:
+    """Robust center and scale of ``buf`` via median and MAD.
+
+    Returns ``(median, scale)`` where ``scale`` is the MAD rescaled to a
+    consistent std estimate. A degenerate (constant) window yields a near-zero
+    MAD; we floor the scale at a tiny epsilon so a genuine jump still scores
+    high instead of dividing by zero.
+    """
+    median = _median_sorted(sorted(buf))
+    mad = _median_sorted(sorted(abs(x - median) for x in buf))
+    scale = _MAD_TO_STD * mad
+    if scale <= 1e-12:
+        scale = 1e-9
+    return median, scale
 
 
 def _median_sorted(ordered: list[float]) -> float:
