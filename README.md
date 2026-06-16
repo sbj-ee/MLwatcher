@@ -187,6 +187,10 @@ tests/           pytest suite
 uv run pytest
 ```
 
+## License
+
+[MIT](LICENSE) © 2026 Stephen B. Johnson.
+
 ## Extending
 
 - **New detector:** implement `update(value) -> Detection` and `reset()`, then
