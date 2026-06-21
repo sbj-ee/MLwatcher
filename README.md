@@ -102,6 +102,12 @@ uv run --extra tclab --extra dashboard python examples/tclab_live.py
 uv run --extra tclab python examples/tclab_live.py --model   # no device needed
 ```
 
+On a real device, with the heater stepped from 0% to 60% at sample 30: the
+robust z-score fires a burst on the rising edge (collapsed to a few alerts by
+the cooldown), while CUSUM keeps re-triggering across the whole sustained climb:
+
+![tclab dashboard](examples/out/tclab.png)
+
 The CLI speaks TCLab directly too — pass `--tclab` instead of a CSV path:
 
 ```bash
