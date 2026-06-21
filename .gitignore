@@ -15,3 +15,4 @@ wheels/
 # Generated run artifacts (keep the dashboard PNGs the README embeds)
 examples/out/*.jsonl
 examples/out/trend.csv
+examples/out/tclab.png
